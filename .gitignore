@@ -1,0 +1,6 @@
+data/
+output/
+*.parquet
+*.tgz
+__pycache__/
+*.log

@@ -1,0 +1,41 @@
+services:
+  ray-head:
+    build: .
+    image: ray-cluster:latest
+    container_name: ray_head
+    shm_size: 2gb
+    ports:
+      - "8265:8265"
+    volumes:
+      - ./apps:/opt/ray-apps
+      - ../docker-spark-cluster/data:/opt/data
+    command: >
+      ray start --head --port=6379 --dashboard-host=0.0.0.0
+      --num-cpus=0 --memory=536870912 --object-store-memory=500000000 --block
+
+  ray-worker-a:
+    image: ray-cluster:latest
+    container_name: ray_worker_a
+    shm_size: 2gb
+    depends_on:
+      - ray-head
+    restart: on-failure
+    volumes:
+      - ./apps:/opt/ray-apps
+      - ../docker-spark-cluster/data:/opt/data
+    command: >
+      ray start --address=ray-head:6379 --num-cpus=2
+      --memory=536870912 --object-store-memory=1500000000 --block
+  ray-worker-b:
+    image: ray-cluster:latest
+    container_name: ray_worker_b
+    shm_size: 2gb
+    depends_on:
+      - ray-head
+    restart: on-failure
+    volumes:
+      - ./apps:/opt/ray-apps
+      - ../docker-spark-cluster/data:/opt/data
+    command: >
+      ray start --address=ray-head:6379 --num-cpus=2
+      --memory=536870912 --object-store-memory=1500000000 --block
